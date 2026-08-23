@@ -1,0 +1,149 @@
+{
+    "version": "1.0",
+    "_about": "Triage-as-code. Every number the risk engine uses lives here, not in the code. Change a weight, re-run, see the queue re-order.",
+
+    "business_hours": {
+        "start_hour": 8,
+        "end_hour": 18,
+        "workdays": [0, 1, 2, 3, 4],
+        "_note": "workdays are Python weekday() values: 0 = Monday .. 6 = Sunday."
+    },
+
+    "account_patterns": {
+        "privileged": ["^admin", "^da[_-]", "[_-]adm$", "administrator$"],
+        "service": ["^svc[_-]", "^sa[_-]", "\\$$"]
+    },
+
+    "internal_domain_suffixes": [".corp.com", ".corp", ".local", ".internal", ".lan"],
+
+    "severity_base": {
+        "High": 50,
+        "Medium": 30,
+        "Low": 10,
+        "Test": 0
+    },
+
+    "intel_modifiers": {
+        "malicious": { "points": 40, "reason": "indicator is known-bad in threat intelligence" },
+        "suspicious": { "points": 20, "reason": "indicator has partial / low-confidence detections" },
+        "unknown": { "points": 0, "reason": "indicator has no reputation data either way" },
+        "clean": { "points": -10, "reason": "indicator is well-known benign infrastructure" },
+        "internal": { "points": -10, "reason": "indicator is a known internal asset, not an external destination" }
+    },
+
+    "context_modifiers": {
+        "outside_business_hours": { "points": 10, "reason": "activity occurred outside configured business hours" },
+        "weekend": { "points": 8, "reason": "activity occurred on a non-working day" },
+        "privileged_account": { "points": 15, "reason": "the acting account matches a privileged-account pattern" },
+        "service_account": { "points": 12, "reason": "a service account ran interactive-looking commands" },
+        "external_destination": { "points": 8, "reason": "the command line references a routable external address" },
+        "metadata_endpoint": { "points": 15, "reason": "the activity reaches the link-local instance metadata service, the usual route from a foothold on a cloud host to that host's credentials" },
+        "external_origin": { "points": 18, "reason": "the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network" },
+        "internal_origin": { "points": 10, "reason": "the session originated from another host on the internal network, which is the shape of lateral movement rather than local use" }
+    },
+
+    "correlation_modifiers": {
+        "kill_chain_progression": {
+            "min_tactics": 3,
+            "points_per_tactic": 8,
+            "max_points": 24,
+            "reason": "this account's alerts span multiple consecutive ATT&CK tactics, suggesting a progressing intrusion rather than an isolated event"
+        },
+        "repeat_rule": {
+            "threshold": 3,
+            "points": 10,
+            "reason": "the same detection fired repeatedly for this account"
+        },
+        "alert_burst": {
+            "window_minutes": 10,
+            "threshold": 5,
+            "points": 12,
+            "reason": "many alerts for this account landed inside a short window"
+        },
+        "shared_origin": {
+            "min_accounts": 3,
+            "window_minutes": 30,
+            "points": 20,
+            "reason": "one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert"
+        }
+    },
+
+    "risk_bands": [
+        { "name": "Critical", "min_score": 85, "queue": "Tier 2 / Incident Response", "sla_minutes": 15 },
+        { "name": "High",     "min_score": 65, "queue": "Tier 2",                     "sla_minutes": 60 },
+        { "name": "Medium",   "min_score": 40, "queue": "Tier 1",                     "sla_minutes": 240 },
+        { "name": "Low",      "min_score": 20, "queue": "Tier 1 / batch review",      "sla_minutes": 1440 },
+        { "name": "Informational", "min_score": 0, "queue": "Auto-close with note",   "sla_minutes": null }
+    ],
+
+    "notify_min_band": "High",
+
+    "playbooks": {
+        "_default": [
+            "Confirm the parent process chain or the session context, whichever the telemetry carries.",
+            "Check whether a change ticket or deployment window explains this activity.",
+            "Record the verdict on the alert so the rule can be tuned."
+        ],
+        "Credential Access": [
+            "Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.",
+            "If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.",
+            "If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.",
+            "Pull the authentication trail for the affected accounts and the originating address across the alert window."
+        ],
+        "Command and Control": [
+            "Block the external indicator at the egress proxy / firewall.",
+            "Pull full network flow for this host over the alert window.",
+            "Check whether other hosts contacted the same indicator."
+        ],
+        "Persistence": [
+            "Enumerate autoruns, scheduled tasks and services created in the alert window.",
+            "Preserve the persistence artifact before removing it.",
+            "Verify the referenced binary's signature and hash."
+        ],
+        "Defense Evasion": [
+            "Verify endpoint protection is still enabled and reporting.",
+            "Review any exclusion paths that were added and remove unapproved ones.",
+            "Assume telemetry gaps for the period after the tampering."
+        ],
+        "Initial Access": [
+            "Retrieve the delivery artifact (attachment / link) and the mail headers.",
+            "Search the mail gateway for the same sender or lure across other recipients.",
+            "Confirm whether the user interacted with the content."
+        ],
+        "Lateral Movement": [
+            "Identify the origin host and treat it as compromised until proven otherwise.",
+            "Pull the authentication trail: which accounts authenticated from that origin, and to what.",
+            "Check whether the credential used here was exposed by an earlier alert on the origin host.",
+            "Map what the destination host gives access to before deciding on containment."
+        ],
+        "Discovery": [
+            "Correlate with the account's normal behaviour before escalating.",
+            "Discovery alone is weak evidence; look for what came before and after it."
+        ],
+        "Execution": [
+            "Decode and read the actual command before judging intent.",
+            "Determine whether the interpreter run is user-initiated or spawned by another process."
+        ],
+        "Privilege Escalation": [
+            "Establish which token or integrity level the process gained, and from what parent.",
+            "Check whether the account is expected to hold local administrator or elevation rights on this host.",
+            "Look at what the elevated context was used for immediately afterwards."
+        ],
+        "Collection": [
+            "Identify what was staged, and where the archive or copy was written.",
+            "Determine the sensitivity of the data touched before deciding on escalation.",
+            "Watch for an outbound transfer following the staging."
+        ],
+        "Exfiltration": [
+            "Quantify what left: bytes, destination and duration, from network flow.",
+            "Identify the data set involved and notify the data owner, and legal/privacy if it is regulated.",
+            "Block the destination at the egress point and check other hosts for the same destination."
+        ],
+        "Impact": [
+            "Verify backup integrity, and that backups are offline or immutable, before anything else.",
+            "Establish blast radius: which hosts, shares and accounts are affected.",
+            "Make an explicit containment decision (host isolation, account disable) and record who authorised it.",
+            "Preserve a sample of the affected files and any ransom note before remediation."
+        ]
+    }
+}

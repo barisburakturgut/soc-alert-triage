@@ -1,0 +1,79 @@
+{
+    "_about": [
+        "Offline threat-intelligence snapshot used by the 'offline' enrichment provider.",
+        "It lets the whole pipeline run with no API keys and no network access, so anyone",
+        "who clones this repo can see a realistic triage immediately.",
+        "Verdicts here are illustrative fixtures, NOT live intelligence. The addresses are",
+        "RFC 5737 documentation ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24), chosen so",
+        "that no real host is implicated by a fabricated abuse record. 203.0.113.233 and",
+        "cdn-update.xyz are stand-ins for known-bad infrastructure. 8.8.8.8 is the one genuinely",
+        "real address here - Google Public DNS - and its 'clean' verdict is the true one.",
+        "File hashes are synthetic values generated for this repo. They match no real sample and",
+        "will not resolve on VirusTotal.",
+        "Any indicator not listed below resolves to verdict 'unknown'."
+    ],
+    "ip": {
+        "203.0.113.233": {
+            "verdict": "malicious",
+            "confidence": 97,
+            "provider": "offline-snapshot (AbuseIPDB-shaped)",
+            "categories": ["C2", "Malware Distribution", "Brute-Force"],
+            "country": "NL",
+            "total_reports": 412,
+            "last_reported": "2026-08-18",
+            "note": "Reported repeatedly as a commodity-loader C2 node."
+        },
+        "198.51.100.30": {
+            "verdict": "suspicious",
+            "confidence": 41,
+            "provider": "offline-snapshot (AbuseIPDB-shaped)",
+            "categories": ["Brute-Force", "SSH", "Port Scan"],
+            "country": "SC",
+            "total_reports": 27,
+            "last_reported": "2026-08-19",
+            "note": "Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here."
+        },
+        "192.0.2.47": {
+            "verdict": "unknown",
+            "confidence": 0,
+            "provider": "offline-snapshot (AbuseIPDB-shaped)",
+            "categories": [],
+            "country": "DE",
+            "total_reports": 0,
+            "last_reported": null,
+            "note": "No reputation data. Unknown is not the same as clean - it means nobody has reported it yet."
+        },
+        "8.8.8.8": {
+            "verdict": "clean",
+            "confidence": 0,
+            "provider": "offline-snapshot (AbuseIPDB-shaped)",
+            "categories": [],
+            "country": "US",
+            "total_reports": 3,
+            "last_reported": "2025-11-02",
+            "note": "Google Public DNS. Well-known infrastructure, treated as benign."
+        }
+    },
+    "domain": {
+        "cdn-update.xyz": {
+            "verdict": "malicious",
+            "confidence": 88,
+            "provider": "offline-snapshot (VirusTotal-shaped)",
+            "categories": ["Phishing", "Malware Delivery"],
+            "detections": "14/94 engines",
+            "registered": "2026-08-11",
+            "note": "Registered 9 days before the alert. Typosquat-style CDN name on a low-cost TLD."
+        }
+    },
+    "hash": {
+        "7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e": {
+            "verdict": "malicious",
+            "confidence": 92,
+            "provider": "offline-snapshot (VirusTotal-shaped)",
+            "categories": ["Trojan.Downloader"],
+            "detections": "51/72 engines",
+            "first_seen": "2026-08-14",
+            "note": "Widely detected downloader stub."
+        }
+    }
+}

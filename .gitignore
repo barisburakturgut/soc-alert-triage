@@ -1,0 +1,24 @@
+# Local secrets - never commit API keys
+.env
+
+# Threat-intel lookup cache (local, regenerated on demand)
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Generated reports, except the committed demo output
+reports/*
+!reports/demo.html
+!reports/demo.json
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

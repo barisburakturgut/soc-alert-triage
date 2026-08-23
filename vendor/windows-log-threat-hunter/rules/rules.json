@@ -1,0 +1,144 @@
+[
+  {
+    "id": "PS-ENCODED",
+    "name": "Encoded PowerShell command",
+    "attack": "T1059.001 / T1027",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(-e|-en|-enc|-enco|-encod|-encode|-encoded|-encodedcommand)\\s+[A-Za-z0-9+/=]{20,}" }
+    ],
+    "description": "PowerShell was launched with a Base64-encoded command, a very common obfuscation and execution technique used to hide intent from log review."
+  },
+  {
+    "id": "PS-DOWNLOAD-CRADLE",
+    "name": "PowerShell download cradle",
+    "attack": "T1105 / T1059.001",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(Net\\.WebClient|DownloadString|DownloadFile|Invoke-WebRequest|Invoke-RestMethod|\\biwr\\b|\\bcurl\\b|\\bwget\\b)" },
+      { "field": "CommandLine", "pattern": "(?i)(IEX|Invoke-Expression|\\|\\s*iex)" }
+    ],
+    "description": "A remote payload is downloaded and piped straight into execution (download-and-run), a hallmark of staged malware delivery."
+  },
+  {
+    "id": "PS-IEX",
+    "name": "Invoke-Expression on dynamic input",
+    "attack": "T1059.001",
+    "severity": "Medium",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(IEX|Invoke-Expression)\\s*\\(" }
+    ],
+    "description": "Invoke-Expression runs a string as code. Legitimate but heavily abused to execute obfuscated or remotely fetched scripts."
+  },
+  {
+    "id": "PS-HIDDEN-BYPASS",
+    "name": "Hidden / execution-policy-bypass PowerShell",
+    "attack": "T1059.001 / T1562.001",
+    "severity": "Medium",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(-w\\s+hidden|-windowstyle\\s+hidden|-nop\\b|-noprofile|-ep\\s+bypass|-executionpolicy\\s+bypass)" }
+    ],
+    "description": "Flags used to run PowerShell invisibly and without profile/policy restrictions. Common in malicious one-liners; rare in normal interactive use."
+  },
+  {
+    "id": "LOLBIN-CERTUTIL",
+    "name": "certutil used as a downloader / decoder",
+    "attack": "T1105 / T1140",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)certutil(\\.exe)?.*(-urlcache|-decode|-decodehex|-f\\s+http)" }
+    ],
+    "description": "certutil is a signed Windows binary abused to download files or decode Base64 payloads, bypassing application controls (a 'living off the land' technique)."
+  },
+  {
+    "id": "LOLBIN-EXEC",
+    "name": "Signed-binary proxy execution (LOLBin)",
+    "attack": "T1218",
+    "severity": "Medium",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)\\b(mshta|regsvr32|rundll32|installutil|regasm|regsvcs|msbuild)\\b.*(http|javascript:|scrobj|\\.dll|\\.sct|\\.xml)" }
+    ],
+    "description": "Trusted Microsoft-signed binaries invoked to proxy-execute remote or scriptlet payloads, evading naive allow-listing."
+  },
+  {
+    "id": "OFFICE-SPAWN-SHELL",
+    "name": "Office application spawned a shell",
+    "attack": "T1566 / T1059",
+    "severity": "High",
+    "conditions": [
+      { "field": "ParentImage", "pattern": "(?i)\\\\(winword|excel|powerpnt|outlook|mspub|visio)\\.exe" },
+      { "field": "Image", "pattern": "(?i)\\\\(cmd|powershell|pwsh|wscript|cscript|mshta|rundll32|regsvr32)\\.exe" }
+    ],
+    "description": "A Microsoft Office process launched a scripting/shell child process, the classic signature of a malicious macro or document lure."
+  },
+  {
+    "id": "PERSIST-RUNKEY",
+    "name": "Registry Run-key persistence",
+    "attack": "T1547.001",
+    "severity": "Medium",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(reg(\\.exe)?\\s+add|New-ItemProperty|Set-ItemProperty).*(\\\\CurrentVersion\\\\Run|\\\\CurrentVersion\\\\RunOnce)" }
+    ],
+    "description": "An autorun value is written under a Run/RunOnce key so a program relaunches at logon, a common persistence mechanism."
+  },
+  {
+    "id": "PERSIST-SCHTASK",
+    "name": "Scheduled-task creation",
+    "attack": "T1053.005",
+    "severity": "Medium",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(schtasks(\\.exe)?\\s+/create|New-ScheduledTask|Register-ScheduledTask)" }
+    ],
+    "description": "A scheduled task is registered. Legitimate for admin work, but also a frequent persistence and delayed-execution technique."
+  },
+  {
+    "id": "CRED-DUMP",
+    "name": "Credential-dumping indicators",
+    "attack": "T1003",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(sekurlsa|Invoke-Mimikatz|mimikatz|comsvcs\\.dll.*MiniDump|procdump.*lsass|lsass\\.dmp)" }
+    ],
+    "description": "Strings associated with dumping credentials from LSASS memory (e.g. Mimikatz, comsvcs MiniDump, procdump on lsass)."
+  },
+  {
+    "id": "DEFENSE-AMSI",
+    "name": "AMSI bypass attempt",
+    "attack": "T1562.001",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(AmsiUtils|amsiInitFailed|AmsiScanBuffer)" }
+    ],
+    "description": "References to the Antimalware Scan Interface internals, typical of in-memory AMSI bypasses that blind script scanning."
+  },
+  {
+    "id": "DEFENSE-AVTAMPER",
+    "name": "Defender tampering",
+    "attack": "T1562.001",
+    "severity": "High",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)(Set-MpPreference\\s+-DisableRealtimeMonitoring|Add-MpPreference\\s+-ExclusionPath|-DisableBehaviorMonitoring|-DisableIOAVProtection)" }
+    ],
+    "description": "Windows Defender real-time protection is being disabled or given exclusions, a common step to blind the endpoint before further activity."
+  },
+  {
+    "id": "OBF-BASE64-BLOB",
+    "name": "Large Base64 blob in command line",
+    "attack": "T1027",
+    "severity": "Low",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "[A-Za-z0-9+/]{120,}={0,2}" }
+    ],
+    "description": "An unusually long Base64 string embedded in a command line, often an encoded payload or shellcode. Low confidence on its own; corroborate with other signals."
+  },
+  {
+    "id": "RECON-BURST",
+    "name": "Host / domain reconnaissance command",
+    "attack": "T1082 / T1087",
+    "severity": "Low",
+    "conditions": [
+      { "field": "CommandLine", "pattern": "(?i)\\b(whoami\\s+/all|net\\s+group\\s+\"domain admins\"|nltest\\s+/dclist|systeminfo|net\\s+localgroup\\s+administrators)\\b" }
+    ],
+    "description": "Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts."
+  }
+]

